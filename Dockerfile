@@ -1,21 +1,17 @@
-FROM docker.io/rust:1.78-alpine3.19 as chef
-RUN apk add --no-cache alpine-sdk
-RUN cargo install cargo-chef
-WORKDIR /usr/src/lrclib
-
-FROM chef AS planner
+FROM rust:1.70 as builder
+WORKDIR /app
 COPY . .
-RUN cargo chef prepare  --recipe-path recipe.json
+RUN cargo build --release
 
-FROM chef AS builder
-COPY --from=planner /usr/src/lrclib/recipe.json recipe.json
-RUN cargo chef cook --release --recipe-path recipe.json
-COPY . .
-RUN cargo build --release --workspace
+FROM debian:bullseye-slim
+RUN apt-get update && apt-get install -y sqlite3 curl gzip
+WORKDIR /app
+COPY --from=builder /app/target/release/lrclib /app/lrclib
+COPY entrypoint.sh /app/entrypoint.sh
+RUN chmod +x /app/entrypoint.sh
 
-FROM alpine:3.19
-RUN apk add --no-cache sqlite
-COPY --from=builder /usr/src/lrclib/target/release/lrclib /usr/local/bin/lrclib
-RUN mkdir /data
+# persistent storage for SQLite
+VOLUME ["/data"]
+
 EXPOSE 3300
-CMD ["lrclib", "serve", "--port", "3300", "--database", "/data/db.sqlite3", "--workers-count", "3"]
+ENTRYPOINT ["/app/entrypoint.sh"]
