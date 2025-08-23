@@ -2,7 +2,7 @@
 set -e
 
 DB_PATH="/data/db.sqlite3"
-DUMP_URL="https://db-dumps.lrclib.net/lrclib-db-dump-20250812T075019Z.sqlite3.gz"
+DUMP_URL="https://db-dumps.lrclib.net/lrclib-db-dump-20250823T005259Z.sqlite3.gz"
 
 echo "[lrclib] Checking DB file: $DB_PATH"
 ls -l /data || echo "[lrclib] /data directory does not exist!"
