@@ -24,4 +24,4 @@ fi
 
 ls -l "$DB_PATH" || echo "[lrclib] DB file was not created!"
 
-exec ./lrclib serve --database "$DB_PATH"
+exec ./lrclib serve --database "$DB_PATH" --workers-count 3
